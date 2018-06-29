@@ -1,36 +1,23 @@
-# Use an official Python runtime as a parent image
+# Use apline base image
 FROM alpine:3.6
 
-# Enviroment variables
-ENV GOPATH /home
+# Configure Environment
+ENV GOROOT /usr/lib/go
+ENV GOPATH /go
+ENV PATH /go/bin:$PATH
 ENV HOME /home
 
-# Variables
-ENV TERRAFORM_VERSION = 0.11.7
-ENV GO_VERSION = 10.3
-
-# AWS-CLI installation
+# AWS-CLI
 RUN apk --update --no-cache add groff less bash python py-pip && \
     pip install 'awscli>=1.11.109' && \
-    pip install 'awscli-cwlogs' && \
     apk --purge -v del py-pip
 
-# Install Terraform, git, curl
-RUN apk add --update --no-cache git curl && \
-    curl https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip > terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
-    unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /bin && \
-    rm -f terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+# Terraform, git, curl, go
+RUN apk add --update --no-cache git curl go musl-dev && \
+    curl https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip > terraform_0.11.7_linux_amd64.zip && \
+    unzip terraform_0.11.7_linux_amd64.zip -d /bin && \
+    rm -f terraform_0.11.7_linux_amd64.zip
 
-# Install go
-RUN curl -O https://dl.google.com/go/go1.${GO_VERSION}.linux-amd64.tar.gz && \
-    tar -xvf go1.${GO_VERSION}.linux-amd64.tar.gz && mv go /usr/local && \
-    export PATH=$PATH:/usr/local/go/bin
-
-# Set working directory to home
+# set working dir & copy scripts to $GOPATH
 WORKDIR $HOME
-
-# Copy the current directory contents into the container at /app
-ADD . $HOME
-
-# Make port 80 available to the world outside this container
-EXPOSE 80
+ADD scripts $GOPATH
