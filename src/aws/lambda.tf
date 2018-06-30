@@ -1,13 +1,13 @@
 provider "aws" {
-  region = "us-east-1"
+  region = "aws_region"
 }
 
 resource "aws_lambda_function" "orion" {
-  function_name = "orion"
+  function_name = "orion-serverless"
 
   # The bucket name as created earlier with "aws s3api create-bucket"
   s3_bucket = "orion-lambda-source"
-  s3_key    = "v1.0.0/example.zip"
+  s3_key    = "v1.0.0/lambda.zip"
 
   # "orion" is the filename within the zip file (main.js) and "handler"
   # is the name of the property under which the handler function was
@@ -15,8 +15,7 @@ resource "aws_lambda_function" "orion" {
   handler = "orion.handler"
   runtime = "go1.x"
 
-  filename         = "../../build/orion.zip"
-
+  filename         = "../../build/lambda.zip"
   role = "${aws_iam_role.orion_lambda_exec_role.arn}"
 }
 
