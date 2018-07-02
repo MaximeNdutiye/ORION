@@ -1,9 +1,9 @@
 package main_test
 
 import (
-	"testing"
-
+	"fmt"
 	"lambda"
+	"testing"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/stretchr/testify/assert"
@@ -26,6 +26,7 @@ func TestHandler(t *testing.T) {
 
 	for _, test := range tests {
 		response, err := lambda.Handler(test.request)
+		fmt.Println("Response: ", response)
 		assert.IsType(t, test.err, err)
 		assert.Equal(t, test.expect, response.Body)
 	}
