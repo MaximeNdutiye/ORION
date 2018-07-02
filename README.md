@@ -2,7 +2,7 @@
 Serverless image scaling service built to run in AWS.
 
 https://travis-ci.com/MaximeNdutiye/ORION\
-[![Build Status](https://travis-ci.com/MaximeNdutiye/ORION.svg?token=jz2ngWM3JpnFiWRYz9Ru&branch=master)](https://travis-ci.com/MaximeNdutiye/ORION)
+[![Build Status](https://travis-ci.com/MaximeNdutiye/ORION.svg?token=jz2ngWM3JpnFiWRYz9Ru&branch=master)]
 
 ### Building the Docker images
 Building the docker container will create and configure a container with everything needed for development.
