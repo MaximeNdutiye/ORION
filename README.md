@@ -38,7 +38,3 @@ Things that we want to get done
 
 ### Built with :purple_heart: By:
 [Maxime](https://github.com/MaximeNdutiye)
-
-### Links
-[Deploying lambda function with terraform](https://www.terraform.io/docs/providers/aws/guides/serverless-with-aws-lambda-and-api-gateway.html)
-[Lambda function handler in go](https://docs.aws.amazon.com/lambda/latest/dg/go-programming-model-handler-types.html)
