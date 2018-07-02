@@ -6,3 +6,6 @@ zip: lambda
 
 install:
 	cd src/lambda && go install
+
+test:
+	cd src/tests && go test -v -race ./...
