@@ -3,7 +3,7 @@ package main_test
 import (
 	"testing"
 
-	lambda "../src/lambda"
+	"lambda"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/stretchr/testify/assert"
