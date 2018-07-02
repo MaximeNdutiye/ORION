@@ -5,4 +5,4 @@ zip: lambda
 	cd build && zip lambda.zip orion
 
 install:
-	cd src && go install
+	cd src/lambda && go install
