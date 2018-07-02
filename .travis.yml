@@ -8,8 +8,7 @@ language: go
 # updates. Any older versions be considered deprecated. Don't bother testing
 # with them.
 go:
-  - 1.9.x
-  - 1.x
+  - "1.10.x"
 
 # Only clone the most recent commit.
 git:
@@ -27,6 +26,7 @@ notifications:
 before_script:
   - go get "github.com/aws/aws-lambda-go/events"
   - go get "github.com/stretchr/testify/assert"
+  - go install
 
 # script always runs to completion (set +e). If we have linter issues AND a
 # failing test, we want to see both. Configure golangci-lint with a

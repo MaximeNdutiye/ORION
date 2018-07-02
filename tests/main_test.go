@@ -21,13 +21,6 @@ func TestHandler(t *testing.T) {
 			expect:  "Hello Paul",
 			err:     nil,
 		},
-		{
-			// Test that the handler responds ErrNameNotProvided
-			// when no name is provided in the HTTP body
-			request: events.APIGatewayProxyRequest{Body: ""},
-			expect:  "",
-			err:     lambda.ErrNameNotProvided,
-		},
 	}
 
 	for _, test := range tests {
