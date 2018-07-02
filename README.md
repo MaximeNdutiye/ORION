@@ -1,13 +1,8 @@
 # ORION
 Serverless image scaling service built to run in AWS.
 
-## About
-
-### Project Structure
-
-### Use Case
-
-## Setup
+https://travis-ci.com/MaximeNdutiye/ORION\
+[![Build Status](https://travis-ci.com/MaximeNdutiye/ORION.svg?token=jz2ngWM3JpnFiWRYz9Ru&branch=master)](https://travis-ci.com/MaximeNdutiye/ORION)
 
 ### Building the Docker images
 Building the docker container will create and configure a container with everything needed for development.
@@ -34,6 +29,10 @@ You can mount your own dirrectories to the container for development purposes
 
 ### Building the lamda
 The lambda function must be package so it can be deployed by terraform
+
+### Run Tests
+
+`make test`
 
 ## FUTURE
 Things that we want to get done
