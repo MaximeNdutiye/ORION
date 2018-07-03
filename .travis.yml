@@ -23,7 +23,7 @@ notifications:
   email: false
 
 # Anything in before_script that returns a nonzero exit code will flunk
-# Get the dependecies required by the lambdas
+# Get the dependecies required by the lambda
 before_script:
   - make getDependencies
 

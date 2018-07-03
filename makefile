@@ -8,7 +8,8 @@ test:
 	cd src/lambda && go test -v -race ./...
 
 getDependencies:
-	cd src/lambda && go get ./...
+	go get "github.com/aws/aws-lambda-go/events" &&
+	go get "github.com/stretchr/testify/assert"
 
 container:
 	docker build -t orion .
