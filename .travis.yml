@@ -22,10 +22,10 @@ install: true
 notifications:
   email: false
 
-# Anything in before_script that returns a nonzero exit code will flunk the
+# Anything in before_script that returns a nonzero exit code will flunk
+# Get the dependecies required by the lambdas
 before_script:
-  - go get "github.com/aws/aws-lambda-go/events"
-  - go get "github.com/stretchr/testify/assert"
+  - make getDependencies
 
 # script always runs to completion (set +e). If we have linter issues AND a
 # failing test, we want to see both. Configure golangci-lint with a

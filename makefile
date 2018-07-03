@@ -6,3 +6,9 @@ zip: lambda
 
 test:
 	cd src/lambda && go test -v -race ./...
+
+getDependencies:
+	cd src/lambda && go get ./...
+
+container:
+	docker build -t orion .

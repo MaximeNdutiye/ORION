@@ -20,4 +20,10 @@ RUN apk add --update --no-cache git curl && \
 
 # set working dir & copy scripts to $GOPATH
 WORKDIR $HOME
-ADD scripts $GOPATH
+ADD src $GOPATH/src
+ADD bin $GOPATH/bin
+ADD pkg $GOPATH/pkg
+ADD build $GOPATH/build
+
+# Go get all dependecies needed
+RUN cd ${GOPATH}/src/lambda && go get ./...
