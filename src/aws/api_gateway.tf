@@ -52,5 +52,5 @@ resource "aws_api_gateway_deployment" "orion-api-gateway-deployment" {
   ]
 
   rest_api_id = "${aws_api_gateway_rest_api.orion-rest-api.id}"
-  stage_name  = "test"
+  stage_name  = "orion"
 }

@@ -1,22 +1,14 @@
 provider "aws" {
-  region = "aws_region"
+  region = "${var.aws_region}"
 }
 
 resource "aws_lambda_function" "orion" {
-  function_name = "orion-serverless"
-
-  # The bucket name as created earlier with "aws s3api create-bucket"
-  s3_bucket = "orion-lambda-source"
-  s3_key    = "v1.0.0/lambda.zip"
-
-  # "orion" is the filename within the zip file (main.js) and "handler"
-  # is the name of the property under which the handler function was
-  # exported in that file.
-  handler = "orion.handler"
-  runtime = "go1.x"
-
+  function_name    = "orion-serverless"
+  handler          = "orion"
+  runtime          = "go1.x"
   filename         = "../../build/lambda.zip"
-  role = "${aws_iam_role.orion_lambda_exec_role.arn}"
+  source_code_hash = "${base64sha256(file("../../build/lambda.zip"))}"
+  role             = "${aws_iam_role.orion_lambda_exec_role.arn}"
 }
 
 # IAM role which dictates what other AWS services the Lambda function
@@ -39,6 +31,35 @@ resource "aws_iam_role" "orion_lambda_exec_role" {
   ]
 }
 EOF
+}
+
+resource "aws_iam_policy" "lambda-log-policy" {
+  name        = "lambda-log-policy"
+  description = "Allow lambda to work with log groups and log streams"
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:DescribeLogStreams"
+    ],
+      "Resource": [
+        "arn:aws:logs:*:*:*"
+    ]
+  }
+ ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "lambda-logs-policy-attachement" {
+    role       = "${aws_iam_role.orion_lambda_exec_role.name}"
+    policy_arn = "${aws_iam_policy.lambda-log-policy.arn}"
 }
 
 resource "aws_lambda_permission" "orion-lambda-permission" {
