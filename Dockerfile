@@ -18,12 +18,6 @@ RUN apk add --update --no-cache git curl && \
     unzip terraform_0.11.7_linux_amd64.zip -d /bin && \
     rm -f terraform_0.11.7_linux_amd64.zip
 
-# set working dir & copy scripts to $GOPATH
-WORKDIR $HOME
-ADD src $GOPATH/src
-ADD bin $GOPATH/bin
-ADD pkg $GOPATH/pkg
-ADD build $GOPATH/build
-
-# Go get all dependecies needed
-RUN cd ${GOPATH}/src/lambda && go get ./...
+RUN mkdir $GOPATH
+ADD makefile $GOPATH/makefile
+WORKDIR $GOPATH

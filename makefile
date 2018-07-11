@@ -1,3 +1,9 @@
+gopath = /go
+dir = $(shell pwd)
+
+setupAWS:
+	chmod +x setupAWS.sh && ./setupAWS.sh
+
 lambda:
 	cd src/lambda && GOOS=linux go build -o ../../build/orion
 
@@ -12,3 +18,15 @@ getDependencies:
 
 container:
 	docker build -t orion .
+
+runcontainer:
+	docker run -it -v $(dir):$(gopath)/ --rm orion
+
+deployLambda:
+	cd src/aws terraform apply -auto-approve
+
+destroyLambda:
+	cd src/aws && terraform destroy -auto-approve
+
+setupTravis:
+	chmod +x setupTravis.sh && ./setupTravis

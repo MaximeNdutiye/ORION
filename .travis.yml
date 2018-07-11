@@ -25,10 +25,15 @@ notifications:
 # Anything in before_script that returns a nonzero exit code will flunk
 # Get the dependecies required by the lambda
 before_script:
+  - pip install --user awscli
+  - make setupTravis
   - make getDependencies
+  - make setupAWS
+  - make deployLambda
 
-# script always runs to completion (set +e). If we have linter issues AND a
-# failing test, we want to see both. Configure golangci-lint with a
-# .golangci.yml file at the top level of your repo.
+# script always runs to completion
 script:
-  - make test # Run all the tests with the race detector enabled
+  - make test
+
+after_script:
+  - make destroyLambda

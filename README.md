@@ -8,33 +8,27 @@ Building the docker container will create and configure a container with everyth
 The docker container is not needed, but it is useful since the environement is preconfigured.
 `Note`: If the container isn't being used then the correct version of terraform and other tools must be installed by the user
 
-`docker build -t orion .`
+`container`
 
 ### Set up AWS-CLI
 AWS credentials must be setup using aws-cli inside the container to be able to deploy to aws
-
-`aws setup` will prompt for the credentials needed
-
-## Development
+After creating a user with credentials to deploy download the .csv containing the user credentials from aws and then run
+`make setupAWS`
 
 ### Running the container
-
-`docker run -it --rm orion`
-
-### Mouting directories
-You can mount your own dirrectories to the container for development purposes
-
-`docker run -it --rm -v /path/to/volume orion`
+Run and mount the needed dirrectories into the container
+`make runcontainer`
 
 ### Building the lamda
-The lambda function must be package so it can be deployed by terraform
+The lambda function must be package into a zip file so it can be deployed by terraform
+`make zip`
 
 ### Run Tests
-
 `make test`
 
-## FUTURE
+### FUTURE
 Things that we want to get done
 
 ### Built with :purple_heart: By:
+
 [Maxime](https://github.com/MaximeNdutiye)
