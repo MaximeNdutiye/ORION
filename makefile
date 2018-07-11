@@ -29,4 +29,4 @@ destroyLambda:
 	cd src/aws && terraform destroy -auto-approve
 
 setupTravis:
-	chmod +x setupTravis.sh && ./setupTravis
+	chmod +x setupTravis.sh && ./setupTravis.sh
