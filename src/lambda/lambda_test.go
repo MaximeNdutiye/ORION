@@ -9,24 +9,34 @@ import (
 )
 
 func TestHandler(t *testing.T) {
+	queryStringParamsMap := make(map[string]string)
 	tests := []struct {
 		request events.APIGatewayProxyRequest
-		expect  string
+		Image   string
+		Width   string
+		Height  string
+		expect  int
 		err     error
 	}{
 		{
-			// Test that the handler responds with the correct response
-			// when a valid name is provided in the HTTP body
-			request: events.APIGatewayProxyRequest{Body: "Paul"},
-			expect:  "Hello Paul",
+			// Send a request to API gateway with some QueryStringParameters
+			request: events.APIGatewayProxyRequest{QueryStringParameters: queryStringParamsMap},
+			Image:   "hello.jpg",
+			Width:   "100",
+			Height:  "200",
+			expect:  200,
 			err:     nil,
 		},
 	}
 
 	for _, test := range tests {
+		queryStringParamsMap["image"] = test.Image
+		queryStringParamsMap["width"] = test.Width
+		queryStringParamsMap["height"] = test.Height
+
 		response, err := Handler(test.request)
 		fmt.Println("Response: ", response)
 		assert.IsType(t, test.err, err)
-		assert.Equal(t, test.expect, response.Body)
+		assert.Equal(t, test.expect, response.StatusCode)
 	}
 }
