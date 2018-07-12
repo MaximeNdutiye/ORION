@@ -23,7 +23,7 @@ runcontainer:
 	docker run -it -v $(dir):$(gopath)/ --rm orion
 
 deployLambda:
-	cd src/aws ../../terraform apply -auto-approve
+	cd src/aws && ../../terraform init && ../../terraform apply -auto-approve
 
 destroyLambda:
 	cd src/aws && ../../terraform destroy -auto-approve
