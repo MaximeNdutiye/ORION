@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 type jsonResponse struct {
@@ -19,11 +20,7 @@ type query struct {
 }
 
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	queryStringParams := request.QueryStringParameters
-	queryStringStruct := processQueryStringParams(queryStringParams)
-	queryString, err := json.Marshal(queryStringStruct)
-	outputJson := jsonResponse{string(queryString), 200}
-	outputString, _ := json.Marshal(outputJson)
+	queryStringParameters, err := json.Marshal(request.QueryStringParameters)
 
 	if err != nil {
 		return events.APIGatewayProxyResponse{}, err
@@ -31,7 +28,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 	logRequestInfo(request)
 	return events.APIGatewayProxyResponse{
-		Body:       string(outputString),
+		Body:       string(queryStringParameters),
 		StatusCode: 200,
 	}, nil
 }
@@ -49,22 +46,6 @@ func logRequestInfo(request events.APIGatewayProxyRequest) {
 	for key, value := range request.QueryStringParameters {
 		fmt.Printf("	%s: %s\n", key, value)
 	}
-}
-
-func processQueryStringParams(queryStringParams map[string]string) query {
-	queryStringStruct := query{}
-
-	for key, value := range queryStringParams {
-		if key == "image" {
-			queryStringStruct.Image = value
-		} else if key == "width" {
-			queryStringStruct.Width = value
-		} else if key == "height" {
-			queryStringStruct.Height = value
-		}
-	}
-
-	return queryStringStruct
 }
 
 func main() {

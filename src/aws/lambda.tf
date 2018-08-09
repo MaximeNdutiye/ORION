@@ -72,3 +72,21 @@ resource "aws_lambda_permission" "orion-lambda-permission" {
   # within the API Gateway "REST API".
   source_arn = "${aws_api_gateway_deployment.orion-api-gateway-deployment.execution_arn}/*/*"
 }
+
+# Bucket for storing Orion config
+resource "aws_s3_bucket" "orion_config_bucket" {
+  bucket = "orion-config-bucket"
+  acl    = "private"
+}
+
+resource "aws_s3_bucket_object" "orion_config" {
+  key        = "config.json"
+  bucket     = "${aws_s3_bucket.orion_config_bucket.id}"
+  source     = "config.json"
+}
+
+# Bucket for storing images
+resource "aws_s3_bucket" "orion_image_bucket" {
+  bucket = "orion-image-bucket"
+  acl    = "private"
+}

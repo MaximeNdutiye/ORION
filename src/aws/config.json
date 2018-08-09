@@ -1,0 +1,14 @@
+{
+    "imageBucketName": "orion_image_bucket",
+    "imageBucketStructure": {
+        "unscaledImagesPath": "/unscaled",
+        "scaledImagesPath": "/scaled"
+    },
+    "allowedFormats": {
+        "imageTypes": [
+            "png", "jpeg"
+        ],
+        "maxImageWidth": "4000"
+        "maxImageHeigh": "4000"
+    }
+}
