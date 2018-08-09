@@ -33,8 +33,8 @@ resource "aws_iam_role" "orion_lambda_exec_role" {
 EOF
 }
 
-resource "aws_iam_policy" "lambda-log-policy" {
-  name        = "lambda-log-policy"
+resource "aws_iam_policy" "lambda_log_policy" {
+  name        = "lambda_log_policy"
   description = "Allow lambda to work with log groups and log streams"
   policy = <<EOF
 {
@@ -57,12 +57,12 @@ resource "aws_iam_policy" "lambda-log-policy" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "lambda-logs-policy-attachement" {
+resource "aws_iam_role_policy_attachment" "lambda_logs_policy_attachement" {
     role       = "${aws_iam_role.orion_lambda_exec_role.name}"
-    policy_arn = "${aws_iam_policy.lambda-log-policy.arn}"
+    policy_arn = "${aws_iam_policy.lambda_log_policy.arn}"
 }
 
-resource "aws_lambda_permission" "orion-lambda-permission" {
+resource "aws_lambda_permission" "orion_lambda_permission" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
   function_name = "${aws_lambda_function.orion.arn}"
@@ -70,23 +70,5 @@ resource "aws_lambda_permission" "orion-lambda-permission" {
 
   # The /*/* portion grants access from any method on any resource
   # within the API Gateway "REST API".
-  source_arn = "${aws_api_gateway_deployment.orion-api-gateway-deployment.execution_arn}/*/*"
-}
-
-# Bucket for storing Orion config
-resource "aws_s3_bucket" "orion_config_bucket" {
-  bucket = "orion-config-bucket"
-  acl    = "private"
-}
-
-resource "aws_s3_bucket_object" "orion_config" {
-  key        = "config.json"
-  bucket     = "${aws_s3_bucket.orion_config_bucket.id}"
-  source     = "config.json"
-}
-
-# Bucket for storing images
-resource "aws_s3_bucket" "orion_image_bucket" {
-  bucket = "orion-image-bucket"
-  acl    = "private"
+  source_arn = "${aws_api_gateway_deployment.orion_api_gateway_deployment.execution_arn}/*/*"
 }
