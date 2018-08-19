@@ -14,7 +14,7 @@ test:
 	cd src/lambda && go test -v -race ./...
 
 getDependencies:
-	go get "github.com/aws/aws-lambda-go/events" "github.com/stretchr/testify/assert" "github.com/aws/aws-sdk-go/service/s3"
+	go get -u "github.com/aws/aws-lambda-go/events" "github.com/stretchr/testify/assert" "github.com/aws/aws-sdk-go/aws/..."
 
 container:
 	docker build -t orion .

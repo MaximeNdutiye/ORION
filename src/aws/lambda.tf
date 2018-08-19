@@ -57,9 +57,35 @@ resource "aws_iam_policy" "lambda-log-policy" {
 EOF
 }
 
+resource "aws_iam_policy" "lambda-s3-policy" {
+  name        = "lambda-s3-policy"
+  description = "My test policy"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject"
+      ],
+      "Resource": "arn:aws:s3:::*"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "lambda-s3-policy-attachement" {
+  role       = "${aws_iam_role.orion_lambda_exec_role.name}"
+  policy_arn = "${aws_iam_policy.lambda-s3-policy.arn}"
+}
+
 resource "aws_iam_role_policy_attachment" "lambda-logs-policy-attachement" {
-    role       = "${aws_iam_role.orion_lambda_exec_role.name}"
-    policy_arn = "${aws_iam_policy.lambda-log-policy.arn}"
+  role       = "${aws_iam_role.orion_lambda_exec_role.name}"
+  policy_arn = "${aws_iam_policy.lambda-log-policy.arn}"
 }
 
 resource "aws_lambda_permission" "orion-lambda-permission" {
@@ -76,7 +102,6 @@ resource "aws_lambda_permission" "orion-lambda-permission" {
 # Bucket for storing Orion config
 resource "aws_s3_bucket" "orion_config_bucket" {
   bucket = "orion-config-bucket"
-  acl    = "private"
 }
 
 resource "aws_s3_bucket_object" "orion_config" {
@@ -88,5 +113,4 @@ resource "aws_s3_bucket_object" "orion_config" {
 # Bucket for storing images
 resource "aws_s3_bucket" "orion_image_bucket" {
   bucket = "orion-image-bucket"
-  acl    = "private"
 }
