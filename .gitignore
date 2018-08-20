@@ -1,2 +1,4 @@
 *.terraform
 src/aws/.terraform
+src/github.com
+src/golang.org
