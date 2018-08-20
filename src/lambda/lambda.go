@@ -1,14 +1,19 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/nfnt/resize"
+	"image"
+	"image/jpeg"
+	_ "image/png"
 )
 
 type jsonResponse struct {
@@ -54,30 +59,37 @@ func logRequestInfo(request events.APIGatewayProxyRequest) {
 }
 
 func getObjectFromBucket() {
-	svc := s3.New(session.New())
-	input := &s3.GetObjectInput{
-		Bucket: aws.String("orion-config-bucket"),
-		Key:    aws.String("config.json"),
+	sess := session.New()
+
+	wab := &aws.WriteAtBuffer{}
+	downloader := s3manager.NewDownloader(sess)
+	uploader := s3manager.NewUploader(sess)
+
+	_, dlErr := downloader.Download(wab, &s3.GetObjectInput{
+		Bucket: aws.String("orion-image-bucket"),
+		Key:    aws.String("image.jpg"),
+	})
+
+	imgBytes := bytes.NewReader(wab.Bytes())
+	image, _, imgScalingErr := image.Decode(imgBytes)
+
+	newImage := resize.Resize(160, 0, image, resize.Lanczos3)
+	scaledImageBuff := bytes.NewBuffer(nil)
+	jpgErr := jpeg.Encode(scaledImageBuff, newImage, nil)
+
+	result, imgUploadErr := uploader.Upload(&s3manager.UploadInput{
+		Bucket: aws.String("orion-image-bucket"),
+		Key:    aws.String("image-scaled.jpg"),
+		Body:   scaledImageBuff,
+	})
+
+	errors := [4]error{dlErr, imgScalingErr, jpgErr, imgUploadErr}
+
+	for err := 0; err < 4; err++ {
+		fmt.Println(errors[err])
 	}
 
-	result, err := svc.GetObject(input)
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case s3.ErrCodeNoSuchKey:
-				fmt.Println(s3.ErrCodeNoSuchKey, aerr.Error())
-			default:
-				fmt.Println(aerr.Error())
-			}
-		} else {
-			// Print the error, cast err to awserr.Error to get the Code and
-			// Message from an error.
-			fmt.Println(err.Error())
-		}
-		return
-	}
-
-	fmt.Println(result)
+	fmt.Println("Finished image scale and upload")
 }
 
 func main() {

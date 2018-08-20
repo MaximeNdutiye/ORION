@@ -9,6 +9,7 @@ resource "aws_lambda_function" "orion" {
   filename         = "../../build/lambda.zip"
   source_code_hash = "${base64sha256(file("../../build/lambda.zip"))}"
   role             = "${aws_iam_role.orion_lambda_exec_role.arn}"
+  timeout          = 300
 }
 
 # IAM role which dictates what other AWS services the Lambda function
