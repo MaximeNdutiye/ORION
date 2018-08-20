@@ -4,6 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"image"
+	"image/jpeg"
+	_ "image/png"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
@@ -11,9 +15,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/nfnt/resize"
-	"image"
-	"image/jpeg"
-	_ "image/png"
 )
 
 type jsonResponse struct {
@@ -77,7 +78,7 @@ func getObjectFromBucket() {
 	scaledImageBuff := bytes.NewBuffer(nil)
 	jpgErr := jpeg.Encode(scaledImageBuff, newImage, nil)
 
-	result, imgUploadErr := uploader.Upload(&s3manager.UploadInput{
+	_, imgUploadErr := uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String("orion-image-bucket"),
 		Key:    aws.String("image-scaled.jpg"),
 		Body:   scaledImageBuff,
