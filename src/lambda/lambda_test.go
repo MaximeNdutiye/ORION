@@ -1,42 +1,78 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"testing"
-
-	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/apigateway"
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
+	"net/http"
+	"testing"
 )
 
 func TestHandler(t *testing.T) {
-	queryStringParamsMap := make(map[string]string)
+	orionRestApi, getRestApiErr := getRestApiFromAWS("orion-rest-api")
+	restApiUrl := constructApiExecURL(*orionRestApi.Id, "orion", "us-east-1")
+
+	if getRestApiErr != nil {
+		fmt.Println(getRestApiErr)
+		return
+	}
+
 	tests := []struct {
-		request events.APIGatewayProxyRequest
-		Image   string
-		Width   string
-		Height  string
-		expect  int
-		err     error
+		Image  string
+		Width  string
+		expect int
+		err    error
 	}{
 		{
-			// Send a request to API gateway with some QueryStringParameters
-			request: events.APIGatewayProxyRequest{QueryStringParameters: queryStringParamsMap},
-			Image:   "hello.jpg",
-			Width:   "100",
-			Height:  "200",
-			expect:  200,
-			err:     nil,
+			Image:  "image.jpg",
+			Width:  "160",
+			err:    nil,
+			expect: 200,
 		},
 	}
 
 	for _, test := range tests {
-		queryStringParamsMap["image"] = test.Image
-		queryStringParamsMap["width"] = test.Width
-		queryStringParamsMap["height"] = test.Height
 
-		response, err := Handler(test.request)
-		fmt.Println("Response: ", response)
-		assert.IsType(t, test.err, err)
-		assert.Equal(t, test.expect, response.StatusCode)
+		url := restApiUrl + "/?imgpath=" + test.Image + "&width=" + test.Width
+		fmt.Println(url)
+		resp, err := http.Get(url)
+		assert.Equal(t, err, nil)
+		assert.Equal(t, resp.StatusCode, 200)
+
+		defer resp.Body.Close()
+		body, _ := ioutil.ReadAll(resp.Body)
+		fmt.Println("Response body" + string(body))
 	}
+}
+
+func getRestApiFromAWS(apiName string) (*apigateway.RestApi, error) {
+	sess := session.New(&aws.Config{
+		Region: aws.String("us-east-1"),
+	})
+	gw := apigateway.New(sess)
+
+	output, err := gw.GetRestApis(&apigateway.GetRestApisInput{
+		Limit:    nil,
+		Position: nil,
+	})
+
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		for index := 0; index < len(output.Items); index++ {
+			if *output.Items[index].Name == apiName {
+				return output.Items[index], nil
+			}
+		}
+	}
+
+	return nil, errors.New("could not find apigateway rest api " + apiName)
+}
+
+func constructApiExecURL(apiId string, apiName string, region string) string {
+	return "https://" + apiId + ".execute-api." + region + ".amazonaws.com/" + apiName
 }
