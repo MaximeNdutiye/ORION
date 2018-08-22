@@ -4,10 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"image"
-	"image/jpeg"
-	_ "image/png"
-
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
@@ -17,7 +13,6 @@ import (
 	"github.com/nfnt/resize"
 	"image"
 	"image/jpeg"
-	_ "image/png"
 	"strconv"
 )
 
