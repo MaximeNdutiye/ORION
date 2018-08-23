@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/apigateway"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -47,6 +48,7 @@ func TestHandler(t *testing.T) {
 		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)
 		fmt.Println("Response body" + string(body))
+		removeObjectFromS3("scaled/" + test.Image)
 	}
 }
 
@@ -76,4 +78,19 @@ func getRestApiFromAWS(apiName string) (*apigateway.RestApi, error) {
 
 func constructApiExecURL(apiId string, apiName string, region string) string {
 	return "https://" + apiId + ".execute-api." + region + ".amazonaws.com/" + apiName
+}
+
+func removeObjectFromS3(objectPath string) {
+	svc := s3.New(session.New(&aws.Config{
+		Region: aws.String("us-east-1"),
+	}))
+	input := &s3.DeleteObjectInput{
+		Bucket: aws.String("orion-image-bucket"),
+		Key:    aws.String(objectPath),
+	}
+
+	_, err := svc.DeleteObject(input)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
