@@ -48,8 +48,9 @@ func TestHandler(t *testing.T) {
 		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)
 		fmt.Println("Response body" + string(body))
-		removeObjectFromS3("scaled/" + test.Image)
 	}
+
+	removeObjectFromS3("scaled/" + test.Image)
 }
 
 func getRestApiFromAWS(apiName string) (*apigateway.RestApi, error) {
