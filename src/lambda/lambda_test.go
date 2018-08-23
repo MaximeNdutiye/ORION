@@ -50,7 +50,7 @@ func TestHandler(t *testing.T) {
 		fmt.Println("Response body" + string(body))
 	}
 
-	removeObjectFromS3("scaled/" + test.Image)
+	removeObjectFromS3("scaled/image.jpg")
 }
 
 func getRestApiFromAWS(apiName string) (*apigateway.RestApi, error) {
