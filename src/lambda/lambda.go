@@ -4,6 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"image"
+	"image/jpeg"
+	"strconv"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
@@ -11,9 +15,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/nfnt/resize"
-	"image"
-	"image/jpeg"
-	"strconv"
 )
 
 type jsonResponse struct {
@@ -29,6 +30,8 @@ type query struct {
 
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	queryStringParameters, err := json.Marshal(request.QueryStringParameters)
+	sess := session.New()
+
 	if err != nil {
 		return events.APIGatewayProxyResponse{}, err
 	}
@@ -36,7 +39,9 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	bucketName := "orion-image-bucket"
 	imagePath := request.QueryStringParameters["imgpath"]
 	desiredWidth, _ := strconv.ParseUint(request.QueryStringParameters["width"], 10, 32)
-	getObjectFromBucket(bucketName, imagePath, uint(desiredWidth))
+	image := getObjectFromS3(bucketName, imagePath, sess)
+	scaledImgBuff := scaleImage(image, uint(desiredWidth))
+	updloadToS3(scaledImgBuff, sess)
 
 	logRequestInfo(request)
 	return events.APIGatewayProxyResponse{
@@ -60,42 +65,55 @@ func logRequestInfo(request events.APIGatewayProxyRequest) {
 	}
 }
 
-func getObjectFromBucket(bucketName string, objectPath string, desiredWidth uint) {
-	sess := session.New()
-
+func getObjectFromS3(bucketName string, objectPath string, sess *Session) image.Image {
 	wab := &aws.WriteAtBuffer{}
 	downloader := s3manager.NewDownloader(sess)
-	uploader := s3manager.NewUploader(sess)
 
 	_, dlErr := downloader.Download(wab, &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(objectPath),
 	})
 
-	imgBytes := bytes.NewReader(wab.Bytes())
-	image, _, imgScalingErr := image.Decode(imgBytes)
-
-	if imgScalingErr != nil {
-		fmt.Println(imgScalingErr)
+	if dlErr != nil {
+		fmt.Println(dlErr)
+		return
 	}
 
-	newImage := resize.Resize(desiredWidth, 0, image, resize.Lanczos3)
+	imgBytes := bytes.NewReader(wab.Bytes())
+	img, _, imgDecodeErr := image.Decode(imgBytes)
+
+	if imgDecodeErr != nil {
+		fmt.Println(imgDecodeErr)
+		return
+	}
+
+	return img
+}
+
+func scaleImage(img image.Image, desiredWidth uint) *Buffer {
+	newImage := resize.Resize(desiredWidth, 0, img, resize.Lanczos3)
 	scaledImageBuff := bytes.NewBuffer(nil)
 	jpgErr := jpeg.Encode(scaledImageBuff, newImage, nil)
 
+	if jpgErr != nil {
+		fmt.Println(jpgErr)
+		return
+	}
+
+	return scaledImageBuff
+}
+
+func updloadToS3(imageBuffer *Buffer, sess *Session) {
+	uploader := s3manager.NewUploader(sess)
 	_, imgUploadErr := uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String("scaled/" + objectPath),
-		Body:   scaledImageBuff,
+		Body:   imageBuffer,
 	})
 
-	errors := [4]error{dlErr, imgScalingErr, jpgErr, imgUploadErr}
-
-	for err := 0; err < 4; err++ {
-		fmt.Println(errors[err])
+	if imgUploadErr != nil {
+		fmt.Println(imgUploadErr)
 	}
-
-	fmt.Println("Finished image scale and upload")
 }
 
 func main() {
