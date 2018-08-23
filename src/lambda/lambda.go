@@ -39,9 +39,32 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	bucketName := "orion-image-bucket"
 	imagePath := request.QueryStringParameters["imgpath"]
 	desiredWidth, _ := strconv.ParseUint(request.QueryStringParameters["width"], 10, 32)
-	image := getObjectFromS3(bucketName, imagePath, sess)
-	scaledImgBuff := scaleImage(image, uint(desiredWidth))
-	updloadToS3(scaledImgBuff, sess)
+	image, imgErr := getObjectFromS3(bucketName, imagePath, sess)
+
+	if imgErr != nil {
+		return events.APIGatewayProxyResponse{
+			Body:       imgErr.Error(),
+			StatusCode: 400,
+		}, imgErr
+	}
+
+	scaledImgBuff, sclngErr := scaleImage(image, uint(desiredWidth))
+
+	if sclngErr != nil {
+		return events.APIGatewayProxyResponse{
+			Body:       sclngErr.Error(),
+			StatusCode: 400,
+		}, sclngErr
+	}
+
+	updlErr := updloadToS3(scaledImgBuff, sess, bucketName, imagePath)
+
+	if updlErr != nil {
+		return events.APIGatewayProxyResponse{
+			Body:       updlErr.Error(),
+			StatusCode: 400,
+		}, updlErr
+	}
 
 	logRequestInfo(request)
 	return events.APIGatewayProxyResponse{
@@ -65,7 +88,7 @@ func logRequestInfo(request events.APIGatewayProxyRequest) {
 	}
 }
 
-func getObjectFromS3(bucketName string, objectPath string, sess *Session) image.Image {
+func getObjectFromS3(bucketName string, objectPath string, sess *session.Session) (image.Image, error) {
 	wab := &aws.WriteAtBuffer{}
 	downloader := s3manager.NewDownloader(sess)
 
@@ -75,35 +98,33 @@ func getObjectFromS3(bucketName string, objectPath string, sess *Session) image.
 	})
 
 	if dlErr != nil {
-		fmt.Println(dlErr)
-		return
+		fmt.Println("Error: could not find " + objectPath)
+		return nil, dlErr
 	}
 
 	imgBytes := bytes.NewReader(wab.Bytes())
 	img, _, imgDecodeErr := image.Decode(imgBytes)
 
 	if imgDecodeErr != nil {
-		fmt.Println(imgDecodeErr)
-		return
+		return nil, imgDecodeErr
 	}
 
-	return img
+	return img, nil
 }
 
-func scaleImage(img image.Image, desiredWidth uint) *Buffer {
+func scaleImage(img image.Image, desiredWidth uint) (*bytes.Buffer, error) {
 	newImage := resize.Resize(desiredWidth, 0, img, resize.Lanczos3)
 	scaledImageBuff := bytes.NewBuffer(nil)
 	jpgErr := jpeg.Encode(scaledImageBuff, newImage, nil)
 
 	if jpgErr != nil {
-		fmt.Println(jpgErr)
-		return
+		return nil, jpgErr
 	}
 
-	return scaledImageBuff
+	return scaledImageBuff, nil
 }
 
-func updloadToS3(imageBuffer *Buffer, sess *Session) {
+func updloadToS3(imageBuffer *bytes.Buffer, sess *session.Session, bucketName string, objectPath string) error {
 	uploader := s3manager.NewUploader(sess)
 	_, imgUploadErr := uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(bucketName),
@@ -111,9 +132,7 @@ func updloadToS3(imageBuffer *Buffer, sess *Session) {
 		Body:   imageBuffer,
 	})
 
-	if imgUploadErr != nil {
-		fmt.Println(imgUploadErr)
-	}
+	return imgUploadErr
 }
 
 func main() {
