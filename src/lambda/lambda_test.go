@@ -12,14 +12,14 @@ import (
 	"github.com/aws/aws-sdk-go/service/apigateway"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"os"
 	"github.com/stretchr/testify/assert"
+	"os"
 )
 
 func TestHandler(t *testing.T) {
 	orionRestApi, getRestApiErr := getRestApiFromAWS("orion-rest-api")
 	restApiUrl := constructApiExecURL(*orionRestApi.Id, "orion", "us-east-1")
-	uploadObjectToS3("../aws/test/image.jpg")
+	uploadObjectToS3("../aws/test/image.jpg", "image.jpg")
 
 	if getRestApiErr != nil {
 		fmt.Println(getRestApiErr)
@@ -84,7 +84,6 @@ func constructApiExecURL(apiId string, apiName string, region string) string {
 	return "https://" + apiId + ".execute-api." + region + ".amazonaws.com/" + apiName
 }
 
-
 func uploadObjectToS3(filename string, key string) {
 	sess := session.New(&aws.Config{
 		Region: aws.String("us-east-1"),
@@ -108,7 +107,6 @@ func uploadObjectToS3(filename string, key string) {
 	}
 	fmt.Printf("file uploaded to, %s\n", aws.StringValue(&result.Location))
 }
-
 
 func removeObjectFromS3(objectPath string) {
 	svc := s3.New(session.New(&aws.Config{
