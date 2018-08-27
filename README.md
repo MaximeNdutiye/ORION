@@ -28,6 +28,9 @@ The lambda function must be package into a zip file so it can be deployed by ter
 ### Run Tests
 `make test`
 
+### AWS Architecture Diagram
+![architecture.png](https://github.com/MaximeNdutiye/ORION/blob/master/images/architecture.png)
+
 ### FUTURE
 - Things that we want to get done
 - Require authentication to access lambda
