@@ -17,7 +17,7 @@ Run `make setupAWS` after mounting the **.csv** inside the container in `/go`
 or manually setup credentials yourself using `aws configure` inside the container
 
 ### Running the container
-Run and mount the needed dirrectories into the container
+Run the container with the required directories using the following command
 
 `make runcontainer`
 
@@ -29,10 +29,10 @@ The lambda function must be package into a zip file so it can be deployed by ter
 `make test`
 
 ### FUTURE
-Things that we want to get done
-Require authentication to access lambda
-More features: filters, convertion, video scaling...
-Seamless upgrades and rollbacks
+- Things that we want to get done
+- Require authentication to access lambda
+- More features: filters, convertion, video scaling...
+- Seamless upgrades and rollbacks
 
 ### Built with :purple_heart: By:
 
