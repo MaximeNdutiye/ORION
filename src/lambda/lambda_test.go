@@ -100,13 +100,13 @@ func uploadObjectToS3(filename string, key string) {
 	result, err := uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String("orion-image-bucket"),
 		Key:    aws.String(key),
-		Body:   f,
+		Body:   img,
 	})
 
 	if err != nil {
 		fmt.Println("failed to upload file, %v", err)
 	}
-	fmt.Printf("file uploaded to, %s\n", aws.StringValue(result.Location))
+	fmt.Printf("file uploaded to, %s\n", aws.StringValue(&result.Location))
 }
 
 
