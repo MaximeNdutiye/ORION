@@ -111,13 +111,6 @@ resource "aws_s3_bucket_object" "orion_config" {
   source     = "config/config.json"
 }
 
-
-resource "aws_s3_bucket_object" "orion_test_image" {
-  key        = "image.jpg"
-  bucket     = "${aws_s3_bucket.orion_image_bucket.id}"
-  source     = "test/image.jpg"
-}
-
 # Bucket for storing images
 resource "aws_s3_bucket" "orion_image_bucket" {
   bucket = "orion-image-bucket"

@@ -17,6 +17,7 @@ import (
 func TestHandler(t *testing.T) {
 	orionRestApi, getRestApiErr := getRestApiFromAWS("orion-rest-api")
 	restApiUrl := constructApiExecURL(*orionRestApi.Id, "orion", "us-east-1")
+	uploadObjectToS3("../aws/test/image.jpg")
 
 	if getRestApiErr != nil {
 		fmt.Println(getRestApiErr)
@@ -80,6 +81,32 @@ func getRestApiFromAWS(apiName string) (*apigateway.RestApi, error) {
 func constructApiExecURL(apiId string, apiName string, region string) string {
 	return "https://" + apiId + ".execute-api." + region + ".amazonaws.com/" + apiName
 }
+
+
+func uploadObjectToS3(filename string, key string) {
+	sess := session.New(&aws.Config{
+		Region: aws.String("us-east-1"),
+	})
+
+	uploader := s3manager.NewUploader(sess)
+	img, err := os.Open(filename)
+
+	if err != nil {
+		fmt.Println("failed to open file %q, %v", filename, err)
+	}
+
+	result, err := uploader.Upload(&s3manager.UploadInput{
+		Bucket: aws.String("orion-image-bucket"),
+		Key:    aws.String(key),
+		Body:   f,
+	})
+
+	if err != nil {
+		fmt.Println("failed to upload file, %v", err)
+	}
+	fmt.Printf("file uploaded to, %s\n", aws.StringValue(result.Location))
+}
+
 
 func removeObjectFromS3(objectPath string) {
 	svc := s3.New(session.New(&aws.Config{
