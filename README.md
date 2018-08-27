@@ -14,6 +14,8 @@ file containing credentials of an IAM user capable of deploying.
 
 Run `make setupAWS` after mounting the **.csv** inside the container in `/go`
 
+or manually setup credentials yourself using `aws configure` inside the container
+
 ### Running the container
 Run and mount the needed dirrectories into the container
 
@@ -28,6 +30,9 @@ The lambda function must be package into a zip file so it can be deployed by ter
 
 ### FUTURE
 Things that we want to get done
+Require authentication to access lambda
+More features: filters, convertion, video scaling...
+Seamless upgrades and rollbacks
 
 ### Built with :purple_heart: By:
 

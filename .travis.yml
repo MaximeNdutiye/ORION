@@ -20,8 +20,9 @@ before_script:
   - pip install --user awscli
   - make setupTravis
   - make getDependencies
-  - make deployLambda
   - make zip
+  - make deployLambda
+
 script:
   - make test
 
