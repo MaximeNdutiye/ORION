@@ -21,10 +21,10 @@ before_script:
   - make setupTravis
   - make getDependencies
   - make zip
-  - make deployLambda
 
 script:
+  - make deployLambda
   - make test
-
+  
 after_script:
   - make destroyLambda
