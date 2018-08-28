@@ -93,7 +93,7 @@ func uploadObjectToS3(filename string, key string) {
 	img, err := os.Open(filename)
 
 	if err != nil {
-		fmt.Println("failed to open file %q, %v", filename, err)
+		fmt.Printf("failed to open file %q, %v", filename, err)
 	}
 
 	result, err := uploader.Upload(&s3manager.UploadInput{
@@ -103,7 +103,7 @@ func uploadObjectToS3(filename string, key string) {
 	})
 
 	if err != nil {
-		fmt.Println("failed to upload file, %v", err)
+		fmt.Printf("failed to upload file, %v", err)
 	}
 	fmt.Printf("file uploaded to, %s\n", aws.StringValue(&result.Location))
 }
