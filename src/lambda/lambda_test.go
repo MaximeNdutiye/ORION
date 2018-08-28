@@ -54,6 +54,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	removeObjectFromS3("scaled/image.jpg")
+	removeObjectFromS3("image.jpg")
 }
 
 func getRestApiFromAWS(apiName string) (*apigateway.RestApi, error) {
