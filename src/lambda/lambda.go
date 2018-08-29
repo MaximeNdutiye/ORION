@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"image"
 	"image/jpeg"
@@ -37,13 +38,25 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 
 	bucketName := "orion-image-bucket"
-	imagePath := request.QueryStringParameters["imgpath"]
-	desiredWidth, _ := strconv.ParseUint(request.QueryStringParameters["width"], 10, 32)
+	imagePath, width, queryErr := checkQueryString(request)
+
+	if queryErr != nil {
+		output, _ := json.Marshal(map[string]string{"error": queryErr.Error(), "parameters": string(queryStringParameters)})
+		fmt.Println(queryErr.Error())
+		return events.APIGatewayProxyResponse{
+			Body:       string(output),
+			StatusCode: 400,
+		}, nil
+	}
+
+	desiredWidth, _ := strconv.ParseUint(width, 10, 32)
 	image, imgErr := getObjectFromS3(bucketName, imagePath, sess)
 
 	if imgErr != nil {
+		output, _ := json.Marshal(map[string]string{"error": imgErr.Error()})
+		fmt.Println(imgErr.Error())
 		return events.APIGatewayProxyResponse{
-			Body:       imgErr.Error(),
+			Body:       string(output),
 			StatusCode: 400,
 		}, imgErr
 	}
@@ -51,8 +64,10 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	scaledImgBuff, sclngErr := scaleImage(image, uint(desiredWidth))
 
 	if sclngErr != nil {
+		output, _ := json.Marshal(map[string]string{"error": sclngErr.Error()})
+		fmt.Println(sclngErr.Error())
 		return events.APIGatewayProxyResponse{
-			Body:       sclngErr.Error(),
+			Body:       string(output),
 			StatusCode: 400,
 		}, sclngErr
 	}
@@ -60,8 +75,10 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	updlErr := updloadToS3(scaledImgBuff, sess, bucketName, imagePath)
 
 	if updlErr != nil {
+		output, _ := json.Marshal(map[string]string{"error": updlErr.Error()})
+		fmt.Println(updlErr.Error() + " : " + string(queryStringParameters))
 		return events.APIGatewayProxyResponse{
-			Body:       updlErr.Error(),
+			Body:       string(output),
 			StatusCode: 400,
 		}, updlErr
 	}
@@ -133,6 +150,17 @@ func updloadToS3(imageBuffer *bytes.Buffer, sess *session.Session, bucketName st
 	})
 
 	return imgUploadErr
+}
+
+func checkQueryString(request events.APIGatewayProxyRequest) (string, string, error) {
+	path, pathExists := request.QueryStringParameters["imgpath"]
+	width, widthExists := request.QueryStringParameters["width"]
+
+	if pathExists && widthExists {
+		return path, width, nil
+	}
+
+	return "", "", errors.New("incorrect options in query string parameters")
 }
 
 func main() {

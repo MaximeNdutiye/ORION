@@ -1,23 +1,28 @@
-# Use apline base image
-FROM alpine:3.6
+FROM ubuntu:18.04
 
-# Configure Environment
-ENV GOROOT /usr/lib/go
+ENV GO_VERSION=1.9
+ENV GOROOT /goroot
 ENV GOPATH /go
-ENV PATH /go/bin:$PATH
-ENV HOME /home
+ENV PATH $PATH:$GOROOT/bin:$GOPATH/bin
+
+RUN apt-get update && apt-get install -y curl make zip
 
 # AWS-CLI
-RUN apk --update --no-cache add groff less bash python py-pip go musl-dev make zip && \
-    pip install 'awscli>=1.11.109' && \
-    apk --purge -v del py-pip
+RUN apt-get install -y python-pip python && \
+    pip install 'awscli>=1.11.109'
 
-# Terraform, git, curl, go
-RUN apk add --update --no-cache git curl && \
-    curl https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip > terraform_0.11.7_linux_amd64.zip && \
+# Go
+RUN mkdir $GOROOT && \
+    curl https://storage.googleapis.com/golang/go${GO_VERSION}.linux-amd64.tar.gz | \
+    tar xvzf - -C $GOROOT --strip-components=1 && \
+    mkdir $GOPATH && \
+    apt-get clean all
+
+# Terraform
+RUN curl https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip > terraform_0.11.7_linux_amd64.zip && \
     unzip terraform_0.11.7_linux_amd64.zip -d /bin && \
     rm -f terraform_0.11.7_linux_amd64.zip
 
-RUN mkdir $GOPATH
+
 ADD makefile $GOPATH/makefile
 WORKDIR $GOPATH
