@@ -1,5 +1,5 @@
 # ORION
-Serverless image scaling service built with `AWS Lambda` and `APIGateway`.
+Serverless image scaling service built with `AWS Lambda` and `API Gateway`.
 
 [![Build Status](https://travis-ci.com/MaximeNdutiye/ORION.svg?token=jz2ngWM3JpnFiWRYz9Ru&branch=master)](https://travis-ci.com/MaximeNdutiye/ORION)
 
@@ -25,18 +25,18 @@ $ export AWS_DEFAULT_REGION=us-west-2
 ```
 
 ### Running the container
-Run the container with the required directories using the following command
+Run the container with the required directories mounted using the following command
 
 `make runcontainer`
 
 ### Building & Packaging
-The lambda function must be package into a zip file so it can be deployed by terraform
+The lambda function must be package into a zip file so it can be deployed by Terraform
 `make zip` will build an **orion** executable and a **lambda.zip**
 
 ### Deploying & Destroying
-`make deploy` will automatically build **lambda.zip** and use terraform to create the AWS architecure
+`make deploy` will automatically build **lambda.zip** and use Terraform to create the AWS architecture
 
-`make destroy` conversly destroys AWS deployment 
+`make destroy` conversly destroys the AWS deployment
 
 ### Run Tests
 Run a simple test to check the API Gateway endpoint to ensure that the lambda is working as intended
